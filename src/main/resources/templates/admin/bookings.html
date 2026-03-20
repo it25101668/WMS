@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Booking System – WMS Admin</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-brand">💍 Wedding Planning System</div>
+    <div class="sidebar-section-label">Management</div>
+    <a href="/admin/dashboard" class="nav-link">🏠 Dashboard</a>
+    <a href="/admin/users"    class="nav-link">👤 User Management</a>
+    <a href="/admin/vendors"  class="nav-link">🏪 Vendor Management</a>
+    <a href="/admin/packages" class="nav-link">📦 Package Management</a>
+    <a href="/admin/bookings" class="nav-link active">📅 Booking System</a>
+    <a href="/admin/reports"  class="nav-link">📊 Report Management</a>
+    <div class="sidebar-section-label">Account</div>
+    <a href="/admin/profile"  class="nav-link">⚙️ Profile</a>
+    <div class="sidebar-footer"><a href="/logout" class="nav-link">🚪 Logout</a></div>
+</div>
+<div class="main-content">
+    <div class="page-header">
+        <h1 th:text="${historyMode} ? 'Booking History' : 'Booking System'">Booking System</h1>
+        <div style="display:flex;gap:10px;" th:unless="${historyMode}">
+            <a href="/admin/bookings/new" class="btn">+ New Booking</a>
+        </div>
+    </div>
+    <div th:if="${successMsg}" class="alert alert-success"><span>✅</span><span th:text="${successMsg}"></span></div>
+    <div th:if="${errorMsg}"   class="alert alert-danger"><span>⚠️</span><span th:text="${errorMsg}"></span></div>
+
+    <div class="stat-cards" th:unless="${historyMode}" style="grid-template-columns:repeat(2,1fr); max-width:360px; margin-bottom:20px;">
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-label">Total Bookings</div>
+            <div class="stat-value" th:text="${totalBookings}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Confirmed</div>
+            <div class="stat-value" th:text="${confirmedBookings}">0</div>
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            <h2 th:text="${historyMode} ? 'Booking History' : 'All Bookings'">All Bookings</h2>
+            <form action="/admin/bookings" method="get" class="search-bar" th:unless="${historyMode}">
+                <input type="text" name="search" th:value="${search}" placeholder="Search by customer, venue, status...">
+                <button type="submit" class="btn btn-sm">🔍 Search</button>
+                <a href="/admin/bookings" class="btn btn-sm btn-secondary">Reset</a>
+            </form>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Customer</th>
+                    <th>Package</th>
+                    <th>Event Date</th>
+                    <th>Venue</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(bookings)}">
+                    <td colspan="8">
+                        <div class="empty-state">
+                            <div class="empty-icon">📅</div>
+                            <p>No bookings found.</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:each="booking, stat : ${bookings}">
+                    <td th:text="${stat.count}"></td>
+                    <td>
+                        <strong th:text="${booking.customer.fullName}"></strong>
+                        <div style="font-size:0.73rem; color:#888;" th:text="${booking.customer.email}"></div>
+                    </td>
+                    <td th:text="${booking.weddingPackage?.name ?: 'Custom'}"></td>
+                    <td th:text="${booking.eventDate}"></td>
+                    <td th:text="${booking.venue ?: '-'}"></td>
+                    <td><strong style="color:var(--dark-pink-shine);" th:text="'Rs. ' + ${#numbers.formatDecimal(booking.totalAmount ?: 0, 1, 'COMMA', 2, 'POINT')}"></strong></td>
+                    <td>
+                        <span class="badge badge-warning" th:if="${booking.status == 'Pending'}">Pending</span>
+                        <span class="badge badge-success" th:if="${booking.status == 'Confirmed'}">Confirmed</span>
+                        <span class="badge badge-info"    th:if="${booking.status == 'Completed'}">Completed</span>
+                        <span class="badge badge-danger"  th:if="${booking.status == 'Cancelled'}">Cancelled</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/admin/bookings/edit/{id}(id=${booking.id})}" class="btn btn-sm">✏️</a>
+                        <a th:href="@{/admin/bookings/delete/{id}(id=${booking.id})}" class="btn btn-sm btn-danger"
+                           onclick="return confirm('Delete this booking?')">🗑️</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

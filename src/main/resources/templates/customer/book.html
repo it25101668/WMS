@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Package – Wedding Management System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="sidebar" style="background: linear-gradient(180deg, #880E4F 0%, #4A148C 100%);">
+    <div class="sidebar-brand">💒 My Wedding Portal</div>
+    <div class="sidebar-section-label">My Account</div>
+    <a href="/customer/dashboard"  class="nav-link">🏠 Dashboard</a>
+    <a href="/customer/bookings"   class="nav-link">📅 My Bookings</a>
+    <a href="/customer/packages"   class="nav-link active">🎁 Book a Package</a>
+    <a href="/customer/profile"    class="nav-link">⚙️ My Profile</a>
+    <div class="sidebar-footer">
+        <a href="/" class="nav-link">🌐 Public Site</a>
+        <a href="/logout" class="nav-link">🚪 Logout</a>
+    </div>
+</div>
+<div class="main-content">
+    <div class="page-header">
+        <h1>Complete Your Booking</h1>
+        <a href="/customer/packages" class="btn btn-outline btn-sm">← Back to Packages</a>
+    </div>
+
+    <div th:if="${errorMsg}" class="alert alert-danger"><span>⚠️</span><span th:text="${errorMsg}"></span></div>
+
+    <div class="form-container" style="max-width:800px; display:flex; gap:24px; align-items:flex-start;">
+        <!-- Package Summary Card -->
+        <div class="section-card" style="flex:1; background:linear-gradient(135deg, rgba(255,255,255,0.95), rgba(252,228,236,0.8));">
+            <div class="section-tag" style="display:inline-block; background:rgba(173,20,87,0.1); color:var(--primary-pink); padding:4px 12px; border-radius:50px; font-size:0.75rem; font-weight:700; margin-bottom:16px;">Selected Package</div>
+            <h2 style="font-family:'Playfair Display', serif; color:var(--dark-pink-shine); font-size:1.6rem; margin-bottom:12px;" th:text="${weddingPackage.name}">Package</h2>
+            
+            <div style="font-size:1.8rem; font-weight:700; color:var(--shining-pink); margin-bottom:20px;">
+                <span style="font-size:1rem; color:#888;">LKR</span>
+                <span th:text="${#numbers.formatDecimal(weddingPackage.price, 0, 'COMMA', 0, 'POINT')}">Price</span>
+            </div>
+            
+            <p style="color:#555; font-size:0.9rem; line-height:1.6; margin-bottom:20px;" th:text="${weddingPackage.description}">Desc</p>
+            
+            <div style="margin-bottom:24px;" th:if="${weddingPackage.inclusions != null}">
+                <strong style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; color:var(--dark-pink-shine);">Inclusions</strong>
+                <ul style="list-style:none; padding-top:8px; margin:0; display:flex; flex-direction:column; gap:8px;">
+                    <li th:each="item : ${#strings.arraySplit(weddingPackage.inclusions, ',')}" style="font-size:0.85rem; color:#444;" th:text="'✓ ' + ${#strings.trim(item)}"></li>
+                </ul>
+            </div>
+            
+            <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(173,20,87,0.1); padding-top:16px; font-size:0.85rem; color:#666;">
+                <span th:if="${weddingPackage.duration != null}"><strong>Duration:</strong> <span th:text="${weddingPackage.duration}"></span></span>
+                <span th:if="${weddingPackage.maxGuests != null}"><strong>Max Guests:</strong> <span th:text="${weddingPackage.maxGuests}"></span></span>
+            </div>
+        </div>
+
+        <!-- Booking Form -->
+        <div class="section-card" style="flex:1.2;">
+            <h2 style="margin-bottom:20px; font-size:1.2rem; color:var(--dark-pink-shine);">Event Details</h2>
+            <form th:action="@{/customer/book/process}" method="post">
+                <input type="hidden" name="packageId" th:value="${weddingPackage.id}" />
+                
+                <div class="form-grid cols-1">
+                    <div class="form-group">
+                        <label for="eventDate">Event Date *</label>
+                        <input type="date" id="eventDate" name="eventDate" required th:min="${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="venue">Desired Venue Location</label>
+                        <input type="text" id="venue" name="venue" placeholder="e.g. Grand Ballroom, Colombo" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="guestCount">Estimated Guest Count</label>
+                        <input type="number" id="guestCount" name="guestCount" placeholder="e.g. 150" th:max="${weddingPackage.maxGuests}" />
+                        <small style="color:#888; font-size:0.75rem; margin-top:4px;" th:if="${weddingPackage.maxGuests != null}">This package supports up to <span th:text="${weddingPackage.maxGuests}"></span> guests.</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Special Requests / Notes</label>
+                        <textarea id="notes" name="notes" placeholder="Any specific requirements or themes..."></textarea>
+                    </div>
+                </div>
+                
+                <div style="margin-top:24px; background:rgba(243,156,18,0.1); border-left:4px solid #f39c12; padding:12px 16px; border-radius:8px; font-size:0.85rem; color:#e67e22; margin-bottom:24px;">
+                    <strong>Note:</strong> Submitting this form will create a Pending booking. Our team will contact you to finalize details and payment.
+                </div>
+                
+                <div class="form-actions" style="margin-top:0;">
+                    <button type="submit" class="btn">Confirm Booking Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

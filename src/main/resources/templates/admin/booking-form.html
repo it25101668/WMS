@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${formTitle} + ' – WMS Admin'">Booking Form</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="sidebar">
+    <div class="sidebar-brand">💍 Wedding Planning System</div>
+    <div class="sidebar-section-label">Management</div>
+    <a href="/admin/users"    class="nav-link">👤 User Management</a>
+    <a href="/admin/vendors"  class="nav-link">🏪 Vendor Management</a>
+    <a href="/admin/packages" class="nav-link">📦 Package Management</a>
+    <a href="/admin/bookings" class="nav-link active">📅 Booking System</a>
+    <a href="/admin/reports"  class="nav-link">📊 Report Management</a>
+    <div class="sidebar-section-label">Account</div>
+    <a href="/admin/profile"  class="nav-link">⚙️ Profile</a>
+    <div class="sidebar-footer"><a href="/logout" class="nav-link">🚪 Logout</a></div>
+</div>
+<div class="main-content">
+    <div class="page-header">
+        <h1 th:text="${formTitle}">Booking Form</h1>
+        <a href="/admin/bookings" class="btn btn-outline">← Back to Bookings</a>
+    </div>
+    <div class="section-card">
+        <div class="form-container">
+            <form th:action="${formAction}" th:object="${booking}" method="post">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Customer *</label>
+                        <select name="customerId" required>
+                            <option value="">-- Select Customer --</option>
+                            <option th:each="c : ${customers}"
+                                    th:value="${c.id}"
+                                    th:text="${c.fullName + ' (' + c.email + ')'}"
+                                    th:selected="${booking.customer != null and booking.customer.id == c.id}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Wedding Package</label>
+                        <select name="packageId">
+                            <option value="">-- No Package (Custom) --</option>
+                            <option th:each="p : ${packages}"
+                                    th:value="${p.id}"
+                                    th:text="${p.name + ' – Rs.' + p.price}"
+                                    th:selected="${booking.weddingPackage != null and booking.weddingPackage.id == p.id}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Event Date *</label>
+                        <input type="date" th:field="*{eventDate}" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Guest Count</label>
+                        <input type="number" th:field="*{guestCount}" placeholder="e.g. 150">
+                    </div>
+                    <div class="form-group">
+                        <label>Total Amount (LKR)</label>
+                        <input type="number" step="0.01" th:field="*{totalAmount}" placeholder="Auto-filled from package">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select th:field="*{status}">
+                            <option value="Pending">Pending</option>
+                            <option value="Confirmed">Confirmed</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Venue</label>
+                        <input type="text" th:field="*{venue}" placeholder="Event venue / location">
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Notes</label>
+                        <textarea th:field="*{notes}" placeholder="Additional notes or special requests..."></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <a href="/admin/bookings" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn">💾 Save Booking</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

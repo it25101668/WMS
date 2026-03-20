@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Dashboard – Wedding Management System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="sidebar" style="background: linear-gradient(180deg, #880E4F 0%, #4A148C 100%);">
+    <div class="sidebar-brand">💒 My Wedding Portal</div>
+    <div class="sidebar-section-label">My Account</div>
+    <a href="/customer/dashboard" class="nav-link active">🏠 Dashboard</a>
+    <a href="/customer/bookings"  class="nav-link">📅 My Bookings</a>
+    <a href="/customer/profile"   class="nav-link">⚙️ My Profile</a>
+    <a href="/customer/customer-package"   class="nav-link">Package Details</a>
+    <div class="sidebar-footer">
+        <a href="/logout" class="nav-link">🚪 Logout</a>
+    </div>
+</div>
+<div class="main-content">
+    <div class="page-header">
+        <h1>Welcome, <span th:text="${customer.firstName}">Customer</span>! 💍</h1>
+        <div class="page-header-right">
+            <span style="font-size:0.85rem; color:var(--dark-pink-shine);" th:text="${customer.email}"></span>
+            <div class="admin-avatar">💒</div>
+        </div>
+    </div>
+
+    <div class="stat-cards" style="grid-template-columns: repeat(3,1fr); max-width:600px; margin-bottom:24px;">
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-label">Total Bookings</div>
+            <div class="stat-value" th:text="${bookings.size()}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Confirmed</div>
+            <div class="stat-value" th:text="${#lists.size(bookings.?[status == 'Confirmed'])}">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-label">Pending</div>
+            <div class="stat-value" th:text="${#lists.size(bookings.?[status == 'Pending'])}">0</div>
+        </div>
+    </div>
+
+    <!-- Available Packages Section -->
+    <div class="section-card" style="margin-bottom:24px;">
+        <div class="section-header">
+            <h2>Available Wedding Packages</h2>
+            <p style="color:#666; font-size:0.9rem; margin-top:4px;">Browse and book our specially curated packages for your dream wedding.</p>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:24px;">
+            <div th:each="pkg : ${packages}" style="background:var(--card-bg); border:1px solid rgba(173,20,87,0.15); border-radius:20px; padding:24px; box-shadow:0 8px 20px rgba(136,14,79,0.06); transition:transform 0.3s; display:flex; flex-direction:column;">
+                
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:12px;">
+                    <div style="font-size:2.4rem;">💍</div>
+                    <span class="badge" th:text="${pkg.status}" th:classappend="${pkg.status == 'Available'} ? 'badge-success' : 'badge-warning'">Available</span>
+                </div>
+                
+                <h3 style="color:var(--dark-pink-shine); font-family:'Playfair Display', serif; font-size:1.4rem; margin-bottom:8px;" th:text="${pkg.name}">Package Name</h3>
+                
+                <div style="font-size:1.6rem; font-weight:700; color:var(--shining-pink); margin-bottom:12px;">
+                    <span style="font-size:0.9rem; color:#888;">LKR</span>
+                    <span th:text="${#numbers.formatDecimal(pkg.price, 0, 'COMMA', 0, 'POINT')}">Price</span>
+                </div>
+                
+                <p style="color:#666; font-size:0.85rem; margin-bottom:20px; line-height:1.5; flex-grow:1;" th:text="${pkg.description}">Description</p>
+                
+                <div style="font-size:0.8rem; color:#888; margin-bottom:20px; display:flex; gap:16px; flex-wrap:wrap;">
+                    <span th:if="${pkg.location != null}">📍 <span th:text="${pkg.location}"></span></span>
+                    <span th:if="${pkg.duration != null}">⏱ <span th:text="${pkg.duration}"></span></span>
+                    <span th:if="${pkg.maxGuests != null}">👥 <span th:text="${pkg.maxGuests}"></span> guests</span>
+                </div>
+
+                <div style="display:flex; gap:10px; width:100%;">
+                    <a th:href="@{/customer/packages/{id}(id=${pkg.id})}" class="btn btn-outline" style="flex:1; justify-content:center; padding:8px 0; font-size:0.9rem;">View Details</a>
+                    <a th:href="@{/customer/book/{id}(id=${pkg.id})}" class="btn" style="flex:1; justify-content:center; padding:8px 0; font-size:0.9rem;">Book Now</a>
+                </div>
+            </div>
+            
+            <div th:if="${#lists.isEmpty(packages)}" class="empty-state" style="grid-column:1/-1;">
+                <div class="empty-icon">🎁</div>
+                <p>No wedding packages are currently available. Please check back later.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Recent Bookings -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2>My Recent Bookings</h2>
+            <a href="/customer/bookings" class="btn btn-outline btn-sm">View All</a>
+        </div>
+        <div th:if="${#lists.isEmpty(bookings)}">
+            <div class="empty-state">
+                <div class="empty-icon">💍</div>
+                <p>No bookings yet. Contact us to start planning your dream wedding!</p>
+            </div>
+        </div>
+        <table class="data-table" th:unless="${#lists.isEmpty(bookings)}">
+            <thead>
+                <tr>
+                    <th>Package</th>
+                    <th>Event Date</th>
+                    <th>Venue</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="booking : ${bookings}">
+                    <td th:text="${booking.weddingPackage?.name ?: 'Custom Booking'}"></td>
+                    <td th:text="${booking.eventDate}"></td>
+                    <td th:text="${booking.venue ?: '-'}"></td>
+                    <td><strong th:text="'Rs. ' + ${#numbers.formatDecimal(booking.totalAmount ?: 0, 1, 'COMMA', 2, 'POINT')}"></strong></td>
+                    <td>
+                        <span class="badge badge-warning" th:if="${booking.status == 'Pending'}">Pending</span>
+                        <span class="badge badge-success" th:if="${booking.status == 'Confirmed'}">Confirmed</span>
+                        <span class="badge badge-info"    th:if="${booking.status == 'Completed'}">Completed</span>
+                        <span class="badge badge-danger"  th:if="${booking.status == 'Cancelled'}">Cancelled</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
