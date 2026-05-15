@@ -36,6 +36,9 @@ public class WeddingPackage {
     @Column(length = 20)
     private String status = "Available"; // Available, Unavailable
 
+    @Column(columnDefinition = "TEXT")
+    private String imageUrls; // Comma-separated list of image paths
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -71,6 +74,9 @@ public class WeddingPackage {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getImageUrls() { return imageUrls; }
+    public void setImageUrls(String imageUrls) { this.imageUrls = imageUrls; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

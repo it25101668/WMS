@@ -43,6 +43,21 @@ public class Booking {
     @Column(columnDefinition = "TEXT")
     private String notes;
 
+    @Column(name = "payment_method", length = 20)
+    private String paymentMethod = "Cash"; // Cash, Card, Koko
+
+    @Column(name = "payment_status", length = 20)
+    private String paymentStatus = "Unpaid"; // Unpaid, Paid, Partial
+
+    @Column(name = "installments_paid")
+    private Integer installmentsPaid = 0; // Tracks 0, 1, 2, 3 installments
+
+    @Column(name = "transaction_id", length = 50)
+    private String transactionId;
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL, orphanRemoval = true)
+    private java.util.List<Payment> payments;
+
     @PrePersist
     protected void onCreate() {
         bookingDate = LocalDateTime.now();
@@ -78,4 +93,18 @@ public class Booking {
 
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getPaymentStatus() { return paymentStatus; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
+    public Integer getInstallmentsPaid() { 
+        return installmentsPaid == null ? 0 : installmentsPaid; 
+    }
+    public void setInstallmentsPaid(Integer installmentsPaid) { this.installmentsPaid = installmentsPaid; }
+
+    public String getTransactionId() { return transactionId; }
+    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
 }

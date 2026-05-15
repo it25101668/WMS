@@ -28,12 +28,32 @@ public class UserController {
         }
         model.addAttribute("totalUsers", userService.getTotalUsers());
         model.addAttribute("activeUsers", userService.getActiveUsers());
-        
+
         // Also load customers for the dashboard
         model.addAttribute("customers", profileService.getAllCustomers());
         model.addAttribute("totalCustomers", profileService.getTotalCustomers());
-        
+
         return "admin/users";
+    }
+
+    // =================== DEDICATED CUSTOMER LIST PAGE ===================
+
+    @GetMapping("/customers")
+    public String listCustomers(@RequestParam(value = "search", required = false) String search, Model model) {
+        java.util.List<com.wms.entity.Customer> customers;
+        if (search != null && !search.isEmpty()) {
+            customers = profileService.getAllCustomers().stream()
+                .filter(c -> (c.getFirstName() + " " + c.getLastName()).toLowerCase().contains(search.toLowerCase())
+                          || c.getEmail().toLowerCase().contains(search.toLowerCase())
+                          || (c.getPhone() != null && c.getPhone().contains(search)))
+                .collect(java.util.stream.Collectors.toList());
+            model.addAttribute("search", search);
+        } else {
+            customers = profileService.getAllCustomers();
+        }
+        model.addAttribute("customers", customers);
+        model.addAttribute("totalCustomers", profileService.getTotalCustomers());
+        return "admin/customers";
     }
 
     @GetMapping("/new")
@@ -61,22 +81,20 @@ public class UserController {
     public String saveUser(@ModelAttribute User user, RedirectAttributes ra) {
         try {
             userService.addUser(user);
-            ra.addFlashAttribute("successMsg", "User added successfully!");
+            ra.addFlashAttribute("successMsg", "✅ User added successfully!");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("errorMsg", e.getMessage());
+            ra.addFlashAttribute("errorMsg", "❌ " + e.getMessage());
         }
         return "redirect:/admin/users";
     }
 
     @PostMapping("/update/{id}")
-    public String updateUser(@PathVariable Long id, @ModelAttribute com.wms.entity.User user, RedirectAttributes ra) {
+    public String updateUser(@PathVariable Long id, @ModelAttribute User user, RedirectAttributes ra) {
         try {
-            System.out.println("DEBUG: "+user.getEmail());
-            System.out.println("DEBUG: "+user.getPhone());
             userService.updateUser(id, user);
-            ra.addFlashAttribute("successMsg", "User updated successfully!");
+            ra.addFlashAttribute("successMsg", "✅ User updated successfully!");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("errorMsg", e.getMessage());
+            ra.addFlashAttribute("errorMsg", "❌ " + e.getMessage());
         }
         return "redirect:/admin/users";
     }
@@ -85,9 +103,9 @@ public class UserController {
     public String deleteUser(@PathVariable Long id, RedirectAttributes ra) {
         try {
             userService.deleteUser(id);
-            ra.addFlashAttribute("successMsg", "User deleted successfully!");
+            ra.addFlashAttribute("successMsg", "✅ User deleted successfully!");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("errorMsg", e.getMessage());
+            ra.addFlashAttribute("errorMsg", "❌ " + e.getMessage());
         }
         return "redirect:/admin/users";
     }
@@ -111,21 +129,21 @@ public class UserController {
     public String updateCustomer(@PathVariable Long id, @ModelAttribute com.wms.entity.Customer customer, RedirectAttributes ra) {
         try {
             profileService.updateCustomerProfile(id, customer);
-            ra.addFlashAttribute("successMsg", "Customer details updated successfully!");
+            ra.addFlashAttribute("successMsg", "✅ Customer details updated successfully!");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("errorMsg", e.getMessage());
+            ra.addFlashAttribute("errorMsg", "❌ " + e.getMessage());
         }
-        return "redirect:/admin/users";
+        return "redirect:/admin/users/customers";
     }
 
     @GetMapping("/customers/delete/{id}")
     public String deleteCustomer(@PathVariable Long id, RedirectAttributes ra) {
         try {
             profileService.deleteCustomer(id);
-            ra.addFlashAttribute("successMsg", "Customer and their bookings deleted successfully!");
+            ra.addFlashAttribute("successMsg", "✅ Customer and their bookings deleted successfully!");
         } catch (RuntimeException e) {
-            ra.addFlashAttribute("errorMsg", "Failed to delete customer: " + e.getMessage());
+            ra.addFlashAttribute("errorMsg", "❌ Failed to delete customer: " + e.getMessage());
         }
-        return "redirect:/admin/users";
+        return "redirect:/admin/users/customers";
     }
 }

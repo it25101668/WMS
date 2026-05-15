@@ -36,12 +36,12 @@
         <span class="particle" style="--x:15%;--y:60%;--s:1.9s"></span>
     </div>
     <div class="hero-content">
-        <div class="hero-badge">✨ Premium Wedding Planning</div>
+        <div class="hero-badge">✈ PREMIUM WEDDING PLANNING</div>
         <h1 class="hero-title">Your Dream Wedding,<br><span class="hero-highlight">Perfectly Planned</span></h1>
         <p class="hero-subtitle">WedLux brings together couples, vendors, and planners in one luxury platform. Every detail, every moment — seamlessly managed.</p>
         <div class="hero-actions">
             <!-- If logged in as customer go to packages, else register -->
-            <a th:if="${session.customer != null}" href="/customer/packages" class="btn hero-btn-primary">Browse Packages</a>
+            <a th:if="${session.customer != null}" href="#packages" class="btn hero-btn-primary">Browse Packages</a>
             <a th:if="${session.customer == null}" href="/customer/register" class="btn hero-btn-primary">Get Started Free</a>
             <a href="#features" class="btn btn-outline hero-btn-secondary">Learn More →</a>
         </div>
@@ -51,15 +51,14 @@
             <span>⭐ Premium Support</span>
         </div>
     </div>
-    <div class="hero-visual" style="animation:none; width:auto; height:auto; display:flex; gap:20px; z-index:2;">
-        <!-- Replacing the rotating emojis with a sleek elegant card layout representation or simple photo placeholders -->
-        <div style="background:linear-gradient(135deg, rgba(255,64,129,0.2), rgba(74,20,140,0.8)); border-radius:120px 120px 20px 20px; width:160px; height:300px; border:2px solid rgba(255,255,255,0.1); box-shadow:0 20px 40px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:4rem; animation:fadeInUp 1s ease-out 0.3s both;">👰</div>
-        <div style="background:linear-gradient(135deg, rgba(74,20,140,0.8), rgba(255,64,129,0.2)); border-radius:20px 20px 120px 120px; width:160px; height:300px; border:2px solid rgba(255,255,255,0.1); box-shadow:0 20px 40px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; font-size:4rem; margin-top:40px; animation:fadeInUp 1s ease-out 0.5s both;">🤵</div>
+    <div class="hero-visual">
+        <div class="hero-card" style="animation:fadeInUp 1s ease-out 0.3s both;">👰</div>
+        <div class="hero-card hero-card-groom" style="animation:fadeInUp 1s ease-out 0.5s both;">🤵</div>
     </div>
 </section>
 
 <!-- ===== STATS ===== -->
-<section class="stats-section" id="stats">
+<section class="stats-section reveal" id="stats">
     <div class="stats-container">
         <div class="stats-grid">
             <div class="stat-item" data-count="500">
@@ -67,7 +66,7 @@
                 <div class="stat-label-lg">Weddings Managed</div>
             </div>
             <div class="stat-item" th:data-count="${totalVendors}">
-                <div class="stat-number" th:text="${totalVendors + '+'}">50+</div>
+                <div class="stat-number">100+</div>
                 <div class="stat-label-lg">Trusted Vendors</div>
             </div>
             <div class="stat-item" th:data-count="${totalPackages}">
@@ -83,7 +82,7 @@
 </section>
 
 <!-- ===== FEATURES ===== -->
-<section class="features-section" id="features">
+<section class="features-section reveal" id="features">
     <div class="section-wrapper">
         <div class="section-tag">What We Offer</div>
         <h2 class="section-title">Everything You Need for the<br>Perfect Wedding</h2>
@@ -124,81 +123,45 @@
 </section>
 
 <!-- ===== PACKAGES ===== -->
-<section class="packages-section" id="packages">
+<section class="packages-section reveal" id="packages">
     <div class="section-wrapper">
-        <div class="section-tag">Our Packages</div>
-        <h2 class="section-title">Choose Your Perfect Package</h2>
-        <p class="section-sub">Handcrafted wedding packages designed to make your special day unforgettable.</p>
-
-        <!-- Dynamic packages from DB -->
-        <div class="packages-grid" th:if="${packages != null and !#lists.isEmpty(packages)}">
-            <div class="pkg-card" th:each="pkg : ${packages}">
-                <div class="pkg-badge" th:text="${pkg.status}" th:classappend="${pkg.status == 'Available'} ? 'badge-available' : 'badge-limited'">Available</div>
-                <div class="pkg-icon">💍</div>
-                <h3 class="pkg-name" th:text="${pkg.name}">Package Name</h3>
+        <div class="section-tag">Curated Collections</div>
+        <h2 class="section-title">Our Premium Wedding Packages</h2>
+        <p class="section-sub">Choose from our carefully crafted bundles or customize your own experience.</p>
+        
+        <div class="packages-grid">
+            <div th:each="pkg, pkgStat : ${packages}" class="pkg-card" th:classappend="${pkgStat.index == 1 ? 'pkg-featured' : ''}">
+                <div class="pkg-badge" 
+                     th:classappend="${pkg.status == 'Available' ? 'badge-available' : 'badge-limited'}"
+                     th:text="${pkg.status}">Available</div>
+                
+                <div class="pkg-icon" th:switch="${pkgStat.index % 4}">
+                    <span th:case="0">🎁</span>
+                    <span th:case="1">💎</span>
+                    <span th:case="2">🥂</span>
+                    <span th:case="3">🌸</span>
+                </div>
+                
+                <h3 class="pkg-name" th:text="${pkg.name}">Gold Wedding</h3>
+                
                 <div class="pkg-price">
-                    <span class="pkg-currency">LKR </span>
-                    <span th:text="${#numbers.formatDecimal(pkg.price, 0, 'COMMA', 0, 'POINT')}">0</span>
+                    <span class="pkg-currency">LKR</span>
+                    <span th:text="${#numbers.formatDecimal(pkg.price, 0, 'COMMA', 0, 'POINT')}">500,000</span>
                 </div>
-                <p class="pkg-desc" th:text="${pkg.description}">Description</p>
-                <ul class="pkg-features" th:if="${pkg.inclusions != null}">
-                    <li th:each="item : ${#strings.arraySplit(pkg.inclusions, ',')}" th:text="${#strings.trim(item)}"></li>
-                </ul>
+                
+                <p class="pkg-desc" th:text="${pkg.description}">Premium wedding package including photography, catering, and decor.</p>
+                
                 <div class="pkg-meta">
-                    <span th:if="${pkg.duration != null}">⏱ <span th:text="${pkg.duration}"></span></span>
-                    <span th:if="${pkg.maxGuests != null}">👥 Up to <span th:text="${pkg.maxGuests}"></span> guests</span>
+                    <span th:text="'🕒 ' + ${pkg.duration}">1 Day</span>
+                    <span th:text="'📍 ' + ${pkg.location}">Colombo</span>
+                    <span th:text="'👥 ' + ${pkg.maxGuests} + ' Guests'">200 Guests</span>
                 </div>
-                <a th:if="${session.customer != null}" th:href="@{/customer/book/{id}(id=${pkg.id})}" class="btn pkg-btn">Book Now</a>
-                <a th:if="${session.customer == null}" href="/customer/login" class="btn pkg-btn">Login to Book</a>
-            </div>
-        </div>
-
-        <!-- Fallback placeholder cards when no packages in DB -->
-        <div class="packages-grid" th:if="${packages == null or #lists.isEmpty(packages)}">
-            <div class="pkg-card pkg-featured">
-                <div class="pkg-badge badge-available">Popular</div>
-                <div class="pkg-icon">🌹</div>
-                <h3 class="pkg-name">Silver Bliss</h3>
-                <div class="pkg-price"><span class="pkg-currency">LKR </span>150,000</div>
-                <p class="pkg-desc">An elegant package for intimate ceremonies with all the essentials.</p>
+                
                 <ul class="pkg-features">
-                    <li>✓ Photography &amp; Videography</li>
-                    <li>✓ Floral Decoration</li>
-                    <li>✓ Wedding Cake</li>
-                    <li>✓ Music &amp; Entertainment</li>
+                    <li th:each="incl : ${#strings.arraySplit(pkg.inclusions, ',')}" th:text="'✓ ' + ${incl.trim()}">✓ Photography</li>
                 </ul>
-                <div class="pkg-meta"><span>⏱ 1 Day</span><span>👥 Up to 100 guests</span></div>
-                <a href="/customer/register" class="btn pkg-btn">Book Now</a>
-            </div>
-            <div class="pkg-card pkg-featured">
-                <div class="pkg-badge badge-available">Best Value</div>
-                <div class="pkg-icon">💍</div>
-                <h3 class="pkg-name">Gold Celebration</h3>
-                <div class="pkg-price"><span class="pkg-currency">LKR </span>300,000</div>
-                <p class="pkg-desc">Our most popular full-day wedding experience with premium vendors.</p>
-                <ul class="pkg-features">
-                    <li>✓ All Silver Bliss inclusions</li>
-                    <li>✓ Luxury Bridal Suite</li>
-                    <li>✓ Full Catering Service</li>
-                    <li>✓ Honeymoon Car</li>
-                </ul>
-                <div class="pkg-meta"><span>⏱ Full Day</span><span>👥 Up to 200 guests</span></div>
-                <a href="/customer/register" class="btn pkg-btn">Book Now</a>
-            </div>
-            <div class="pkg-card">
-                <div class="pkg-badge badge-limited">Premium</div>
-                <div class="pkg-icon">👑</div>
-                <h3 class="pkg-name">Diamond Royale</h3>
-                <div class="pkg-price"><span class="pkg-currency">LKR </span>600,000</div>
-                <p class="pkg-desc">The ultimate luxury wedding experience — absolutely nothing left to chance.</p>
-                <ul class="pkg-features">
-                    <li>✓ All Gold Celebration inclusions</li>
-                    <li>✓ Destination Options</li>
-                    <li>✓ Dedicated Planner</li>
-                    <li>✓ VIP Guest Concierge</li>
-                </ul>
-                <div class="pkg-meta"><span>⏱ 3 Days</span><span>👥 Up to 500 guests</span></div>
-                <a href="/customer/register" class="btn pkg-btn">Book Now</a>
+                
+                <a th:href="${session.customer != null ? '/customer/book/' + pkg.id : '/customer/login'}" class="btn pkg-btn">Book Now</a>
             </div>
         </div>
     </div>
@@ -239,6 +202,52 @@ function toggleMenu() {
 document.querySelectorAll('.nav-a, .nav-btn').forEach(a => {
     a.addEventListener('click', () => document.querySelector('.nav-links').classList.remove('open'));
 });
+
+// --- Scroll Reveal ---
+function reveal() {
+    var reveals = document.querySelectorAll(".reveal, .reveal-left, .reveal-right");
+    for (var i = 0; i < reveals.length; i++) {
+        var windowHeight = window.innerHeight;
+        var elementTop = reveals[i].getBoundingClientRect().top;
+        var elementVisible = 150;
+        if (elementTop < windowHeight - elementVisible) {
+            reveals[i].classList.add("active");
+            // If it's the stats section, trigger count up
+            if (reveals[i].id === 'stats') {
+                startCountUp();
+            }
+        }
+    }
+}
+window.addEventListener("scroll", reveal);
+
+// --- Count Up Animation ---
+let counted = false;
+function startCountUp() {
+    if (counted) return;
+    counted = true;
+    const stats = document.querySelectorAll('.stat-number');
+    stats.forEach(stat => {
+        const target = parseInt(stat.parentElement.getAttribute('data-count')) || parseInt(stat.innerText);
+        let count = 0;
+        const speed = 2000 / target; // adjust speed
+        const updateCount = () => {
+            const increment = Math.ceil(target / 50);
+            if (count < target) {
+                count += increment;
+                if (count > target) count = target;
+                stat.innerText = count + (stat.innerText.includes('+') ? '+' : '');
+                setTimeout(updateCount, 40);
+            } else {
+                stat.innerText = target + (stat.innerText.includes('+') ? '+' : '');
+            }
+        };
+        updateCount();
+    });
+}
+
+// Initial check
+reveal();
 </script>
 </body>
 </html>

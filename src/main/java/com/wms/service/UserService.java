@@ -59,6 +59,10 @@ public class UserService {
             existing.setFullName(updatedUser.getFullName());
         }
 
+        if (updatedUser.getProfilePic() != null && !updatedUser.getProfilePic().isEmpty()) {
+            existing.setProfilePic(updatedUser.getProfilePic());
+        }
+
         if (updatedUser.getPhone() != null && !updatedUser.getPhone().isEmpty()) {
             existing.setPhone(updatedUser.getPhone());
         }

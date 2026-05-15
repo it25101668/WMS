@@ -23,13 +23,25 @@ public class BookingController {
     @Autowired
     private PackageService packageService;
 
+    @Autowired
+    private com.wms.service.AdminRegistrationService adminRegistrationService;
+
+    @ModelAttribute
+    public void addAdminAttributes(jakarta.servlet.http.HttpSession session, Model model) {
+        com.wms.entity.User adminUser = (com.wms.entity.User) session.getAttribute("adminUser");
+        if (adminUser != null) {
+            model.addAttribute("adminUser", adminUser);
+            model.addAttribute("pendingAdminRequests", adminRegistrationService.countPending());
+        }
+    }
+
     @GetMapping
     public String listBookings(@RequestParam(value = "search", required = false) String search, Model model) {
         if (search != null && !search.isEmpty()) {
             model.addAttribute("bookings", bookingService.searchBookings(search));
             model.addAttribute("search", search);
         } else {
-            model.addAttribute("bookings", bookingService.getAllBookings());
+            model.addAttribute("bookings", bookingService.getAllBookingsWithDetails());
         }
         model.addAttribute("totalBookings", bookingService.getTotalBookings());
         model.addAttribute("confirmedBookings", bookingService.getConfirmedBookings());
@@ -105,5 +117,20 @@ public class BookingController {
         model.addAttribute("bookings", bookingService.getBookingHistory(customerId));
         model.addAttribute("historyMode", true);
         return "admin/bookings";
+    }
+
+    /**
+     * REST endpoint — returns JSON list of booked dates for a package.
+     * Used by the booking form JS to disable already-taken dates.
+     * Optional param excludeBookingId lets edit mode ignore its own date.
+     *
+     * GET /admin/bookings/booked-dates?packageId=X[&excludeBookingId=Y]
+     */
+    @GetMapping("/booked-dates")
+    @ResponseBody
+    public java.util.List<String> getBookedDates(
+            @RequestParam Long packageId,
+            @RequestParam(required = false) Long excludeBookingId) {
+        return bookingService.getBookedDatesForPackage(packageId, excludeBookingId);
     }
 }

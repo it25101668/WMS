@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@org.springframework.transaction.annotation.Transactional
 public class ProfileService {
 
     @Autowired
@@ -64,23 +65,29 @@ public class ProfileService {
     }
 
     public List<Customer> getAllCustomers() {
-        return customerRepository.findAll();
+        return customerRepository.findRecentCustomers();
+    }
+
+    public List<Customer> getRecentCustomers() {
+        return customerRepository.findRecentCustomers();
     }
 
     public void deleteCustomer(Long id) {
-        if (!customerRepository.existsById(id)) {
-            throw new RuntimeException("Customer not found: " + id);
-        }
+        Customer customer = customerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Customer not found: " + id));
+        // Delete related bookings first to avoid FK constraint violation
+        List<Booking> bookings = bookingRepository.findByCustomerOrderByBookingDateDesc(customer);
+        bookingRepository.deleteAll(bookings);
         customerRepository.deleteById(id);
     }
 
     public List<Booking> getCustomerBookings(Long customerId) {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found: " + customerId));
-        return bookingRepository.findByCustomerOrderByBookingDateDesc(customer);
+        return bookingRepository.findByCustomerWithPackage(customer);
     }
 
     public long getTotalCustomers() {
-        return customerRepository.count();
+        return customerRepository.countNonAdminCustomers();
     }
 }

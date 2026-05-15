@@ -1,17 +1,24 @@
 package com.wms.service;
 
+import com.wms.entity.Booking;
 import com.wms.entity.WeddingPackage;
+import com.wms.repository.BookingRepository;
 import com.wms.repository.PackageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class PackageService {
 
     @Autowired
     private PackageRepository packageRepository;
+
+    @Autowired
+    private BookingRepository bookingRepository;
 
     public List<WeddingPackage> getAllPackages() {
         return packageRepository.findAll();
@@ -32,17 +39,26 @@ public class PackageService {
         existing.setDescription(updatedPackage.getDescription());
         existing.setPrice(updatedPackage.getPrice());
         existing.setDuration(updatedPackage.getDuration());
+        existing.setLocation(updatedPackage.getLocation());
         existing.setInclusions(updatedPackage.getInclusions());
         existing.setMaxGuests(updatedPackage.getMaxGuests());
         existing.setStatus(updatedPackage.getStatus());
+        if (updatedPackage.getImageUrls() != null) {
+            existing.setImageUrls(updatedPackage.getImageUrls());
+        }
         return packageRepository.save(existing);
     }
 
     public void deletePackage(Long id) {
-        if (!packageRepository.existsById(id)) {
-            throw new RuntimeException("Package not found with id: " + id);
+        WeddingPackage pkg = packageRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Package not found with id: " + id));
+        // Null out bookings that reference this package to avoid FK constraint violation
+        List<Booking> bookings = bookingRepository.findByWeddingPackageId(id);
+        for (Booking booking : bookings) {
+            booking.setWeddingPackage(null);
+            bookingRepository.save(booking);
         }
-        packageRepository.deleteById(id);
+        packageRepository.delete(pkg);
     }
 
     public List<WeddingPackage> searchPackages(String keyword) {

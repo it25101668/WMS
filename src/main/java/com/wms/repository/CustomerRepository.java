@@ -23,4 +23,10 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
            "LOWER(c.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(c.phone) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Customer> searchCustomers(@Param("keyword") String keyword);
+
+    @Query("SELECT c FROM Customer c LEFT JOIN c.user u WHERE u IS NULL OR u.role <> 'ADMIN' ORDER BY c.createdAt DESC")
+    List<Customer> findRecentCustomers();
+
+    @Query("SELECT COUNT(c) FROM Customer c LEFT JOIN c.user u WHERE u IS NULL OR u.role <> 'ADMIN'")
+    long countNonAdminCustomers();
 }

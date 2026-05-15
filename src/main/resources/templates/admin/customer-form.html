@@ -9,7 +9,9 @@
 <div class="sidebar">
     <div class="sidebar-brand">💍 Wedding Planning System</div>
     <div class="sidebar-section-label">Management</div>
-    <a href="/admin/users"    class="nav-link active">👤 User Management</a>
+    <a href="/admin/dashboard" class="nav-link">🏠 Dashboard</a>
+    <a href="/admin/users"    class="nav-link">👤 User Management</a>
+    <a href="/admin/users/customers" class="nav-link active">👥 Customers</a>
     <a href="/admin/vendors"  class="nav-link">🏪 Vendor Management</a>
     <a href="/admin/packages" class="nav-link">📦 Package Management</a>
     <a href="/admin/bookings" class="nav-link">📅 Booking System</a>
@@ -22,7 +24,7 @@
 <div class="main-content">
     <div class="page-header">
         <h1 th:text="${formTitle}">Edit Customer</h1>
-        <a href="/admin/users" class="btn btn-outline btn-sm">← Back to Users Overview</a>
+        <a href="/admin/users/customers" class="btn btn-outline btn-sm">← Back to Customers</a>
     </div>
 
     <div class="form-container">
@@ -48,7 +50,7 @@
                     <label for="address">Address</label>
                     <textarea id="address" name="address" th:text="${customer.address}"></textarea>
                 </div>
-                
+
                 <div class="form-group" style="grid-column: 1 / -1;">
                     <label for="password">Change Password (leave blank to keep current)</label>
                     <input type="password" id="password" name="password" placeholder="New Password">
@@ -56,7 +58,7 @@
             </div>
 
             <div class="form-actions">
-                <a href="/admin/users" class="btn btn-secondary">Cancel</a>
+                <a href="/admin/users/customers" class="btn btn-secondary">Cancel</a>
                 <button type="submit" class="btn">Save Customer Details</button>
             </div>
         </form>
